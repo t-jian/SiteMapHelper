@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{block 'title'}}目之{{/block}}</title>
+  <link rel="stylesheet" href="http://www.ztan.net/css/bootstrap.min.css">
+  <link rel="stylesheet" href="http://www.ztan.net/css/m.css">
+  {{block 'head'}}{{/block}}
+</head>
+<body itemscope itemtype="http://schema.org/WebPage">
+  {{include './header.html'}}
+  {{block 'body'}}{{/block}}
+   <script src="http://www.ztan.net/js/bootstrap.min.js"></script>
+   <script src="http://www.ztan.net/js/jquery-3.6.0.min.js"></script>
+  {{block 'script'}}{{/block}}
+</body>
+</html>
