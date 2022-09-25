@@ -8,39 +8,49 @@ var reptile = {
     hostname: '',
     protocol: '',
     pathname: '',
-    save_path:'sitemap.txt',//文件保存路径
-    complete_arr: [],//已经爬取的url
-    wait_arr: [],//等待爬取
-    show_url:false,//是否打印当前爬取的链接   默认不显示
-    wait_current: 0,//wait_arr[wait_current]获取不到值得时候则爬取完毕
-    chageUrlCallback:()=>{},//每获取到一条记录 改变一次
+    save_path: 'sitemap.txt', //文件保存路径
+    complete_arr: [], //已经爬取的url
+    wait_arr: [], //等待爬取
+    show_url: false, //是否打印当前爬取的链接   默认不显示
+    wait_current: 0, //wait_arr[wait_current]获取不到值得时候则爬取完毕
+    onChange: function(res) {}, //每获取到一条记录改变一次
+    onSuccess: function(res) {}, //成功获取url
+    onInterrupt: () => {}, //中断抓取
     /**
      * 爬取的网站  提取hostname
      * @param json.href  地址链接 通过扩展名，来生成xml或则txt
      * @param json.save_path  文件保存路径
      */
-    init: function (json) {
-        if(typeof json != 'object') throw "参数错误！";
+    init: function(json) {
+        this.wait_arr = [];
+        this.complete_arr = [];
+        this.wait_current = 0;
+        if (typeof json != 'object') throw "参数错误！";
         this.hostname = url.parse(json.href).hostname;
         this.protocol = url.parse(json.href).protocol;
-        if(json.chageUrlCallback!=undefined&& typeof json.chageUrlCallback==="function"){
-            chageUrlCallback=json.chageUrlCallback;
+        if (json.onChange != undefined && typeof json.onChange === "function") {
+            onChange = json.onChange;
+        }
+        if (json.onSuccess != undefined && typeof json.onSuccess === "function") {
+            onSuccess = json.onSuccess;
         }
         this.wait_arr.push(json.href);
         json.save_path && (this.save_path = json.save_path);
         json.show_url && (this.show_url = json.show_url);
         this.play_url();
-        
+
     },
     /**
      * 获取等待爬取里面的url
      * 如果获取不到url时则爬取结束
      */
-    play_url: function () {
+    play_url: function() {
         var i = this.wait_current;
+        console.log(this.wait_arr, i)
         if (!this.wait_arr[i]) {
-            this.site_type();//最后生成的sitemap是什么格式
+            this.site_type(); //最后生成的sitemap是什么格式
             console.log('完成！');
+
         } else {
             this.req(this.wait_arr[i]);
             this.wait_current++;
@@ -49,42 +59,61 @@ var reptile = {
     /**
      * sitemap生成的格式   xml||txt
      */
-    site_type:function(){
+    site_type: function() {
         var s_p = this.save_path;
         //判断生成什么类型的sitemap
         var sitemap_content = '';
-        switch(s_p.substring(s_p.lastIndexOf('.'),s_p.length)){
+        switch (s_p.substring(s_p.lastIndexOf('.'), s_p.length)) {
             case '.xml':
                 var str = this.complete_arr.toString(),
-                xmlns = 'xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd"';
-                var url = '<urlset '+ xmlns +'>\n<url>\n    <loc>' + str.replace(/,/g,'</loc>\n</url>\n<url>\n    <loc>') + '</loc>\n</url>\n</urlset>';
+                    xmlns = 'xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd"';
+                var url = '<urlset ' + xmlns + '>\n<url>\n    <loc>' + str.replace(/,/g, '</loc>\n</url>\n<url>\n    <loc>') + '</loc>\n</url>\n</urlset>';
                 sitemap_content = '<?xml version="1.0" encoding="UTF-8"?>\n' + url;
                 break;
             case '.txt':
-                sitemap_content = this.complete_arr.toString().replace(/\,/g,'\n');
+                sitemap_content = this.complete_arr.toString().replace(/\,/g, '\n');
                 break;
             default:
-                sitemap_content = this.complete_arr.toString().replace(/\,/g,'\n');
-                break;       
+                sitemap_content = this.complete_arr.toString().replace(/\,/g, '\n');
+                break;
         }
-        fs.writeFileSync(this.save_path,sitemap_content);
+        onSuccess(this.complete_arr);
+        // fs.writeFileSync(this.save_path, sitemap_content);
+    },
+    transformContent: function(type = "xml") {
+        var sitemap_content = '';
+        switch (type) {
+            case 'xml':
+                var str = this.complete_arr.toString(),
+                    xmlns = 'xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd"';
+                var url = '<urlset ' + xmlns + '>\n<url>\n    <loc>' + str.replace(/,/g, '</loc>\n</url>\n<url>\n    <loc>') + '</loc>\n</url>\n</urlset>';
+                sitemap_content = '<?xml version="1.0" encoding="UTF-8"?>\n' + url;
+                break;
+            case 'txt':
+                sitemap_content = this.complete_arr.toString().replace(/\,/g, '\n');
+                break;
+            default:
+                sitemap_content = this.complete_arr.toString().replace(/\,/g, '\n');
+                break;
+        }
+        return sitemap_content;
     },
     /**
      * 爬取对应的地址
      * @param src
      */
-    req: function (src) {
+    req: function(src) {
         var _this = this;
         if (this.judge(src)) {
             //开始爬取页面，如果成功，就存入爬取成功的数组当中
-            request(src, function (err, res, body) {
+            request(src, function(err, res, body) {
                 if (err) return false;
                 _this.show_url && console.log(src);
                 //如果数组当中不存在才添加
                 _this.pathname = res.request.uri.pathname;
                 var s = _this.push(_this.complete_arr, src);
                 s && _this.complete_arr.push(s);
-                chageUrlCallback(s);
+                onChange(s);
                 _this.get_url(body);
             })
         }
@@ -93,12 +122,13 @@ var reptile = {
      * 获取当期页面所有链接
      * @param body
      */
-    get_url: function (body) {
+    get_url: function(body) {
         var $ = cheerio.load(body);
         var a = $('a');
         var _this = this;
         for (var i = 0, len = a.length; i < len; i++) {
             var src = _this.judge(a[i].attribs.href);
+            // console.log(a[i].text, 77777)
             //把当前页面本网站的链接存入带爬取的数组
             if (src) {
                 //如果数组当中不存在才添加
@@ -113,7 +143,7 @@ var reptile = {
      * 判断链接是否属于本网站
      * @param src
      */
-    judge: function (src) {
+    judge: function(src) {
         var href = src;
         if (!href) return false;
         if (href.match(/(.png|.jpg|.gif|.zip)$/)) return false;
@@ -128,7 +158,7 @@ var reptile = {
     /**
      * 判断链接是否已经存在
      */
-    push: function (arr, src) {
+    push: function(arr, src) {
         var flag = src;
         for (var i = 0, len = arr.length; i < len; i++) {
             if (arr[i] == src) {
