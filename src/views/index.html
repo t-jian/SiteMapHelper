@@ -1,10 +1,12 @@
 {{extend './shared/_layout.html'}} {{block 'title'}}{{'sitemap在线生成|网站地图|站点地图|在线生成-目之瞬间-专注于互联网平台'}}{{/block}} {{block 'keywords'}}'sitemap在线生成,网站地图，站点地图，sitemap生成器，网站爬虫'{{/block}} {{block 'desc'}}'本工具使用网站爬虫原理，它可以生成网站的sitemap.xml地图、sitemap.txt URL列表，rss.xml
 用于订阅的网址列表，sitemap.html 可访问网站网址列表。'{{/block}} {{block 'head'}}
 <style>
+   .m{
+    max-width: 800px;
+    margin: 0 auto;
+   }
     .form-box {
-        max-width: 800px;
         text-align: center;
-        margin: 0 auto;
         margin-top: 20px;
     }
     
@@ -55,12 +57,16 @@
         right: 10px;
         display: none;
     }
+    .intro-box h1{
+        font-size: 22px;
+        font-weight: 500;
+    }
 </style>
 {{/block}} {{block 'body'}}
 <div class="container">
     <div class="row">
         <div class="col-12 mb-3">
-            <div class="form-box">
+            <div class="form-box m">
                 <form class="form" method="post">
                     <div class="mb-3"><input id="input_host" name="host" class="form-control form-control-lg" value="http://bt.aimzhi.cn" type="text" placeholder="请输入网站域名，加密网站请使用https://开头"></div>
                     <div class="mb-3"><button id="submitBtn" type="submit" class="btn btn-primary ">生成网站地图</button></div>
@@ -71,6 +77,52 @@
                     </div>
                     <ul id="mul"></ul>
                 </div>
+            </div>
+        </div>
+    </div>
+    <div class="row intro-box">
+        <div class="col-12 mb-3">
+            <h1>什么是sietmap?什么是站点地图？</h1>
+            <p>
+                网站地图可以方便搜索引擎蜘蛛抓取网站页面，通过抓取网站页面，清晰了解网站的架构，网站地图一般存放在根目录下并命名为sitemap，为搜索引擎蜘蛛指路，增加网站重要内容页面的收录。网站地图就是根据网站的结构、框架、内容，生成的导航网页文件。大多数人都知道网站地图对于提高用户体验有好处：它们为网站访问者指明方向，并帮助迷失的访问者找到他们想看的页面。
+            </p>
+        </div>
+        <div class="col-12">
+            <h1>网站地图sitemap有什么作用？</h1>
+            <ul>
+                <li>1．为搜索引擎蜘蛛提供可以浏览整个网站的链接简单的体现出网站的整体框架出来给搜索引擎看；</li>
+                <li>2．为搜索引擎蜘蛛提供一些链接，指向动态页面或者采用其他方法比较难以到达的页面；</li>
+                <li>3．作为一种潜在的着陆页面，可以为搜索流量进行优化；</li>
+           </ul>
+        </div>
+        <div class="col-12">
+            <h1>网站地图sitemap的形式？</h1>
+            网站地图有多种形式存在，包括HTML、TXT、XML。不同的格式，都有着不同的用途。
+            通常情况下，普通用户在找不到自己需要的目标时，可以打开网站地图页面，这个就是HTML格式的网站地图。
+            在对于爬虫等搜索引擎的时候，TXT、XML格式的网站地图文件就可以方便解析，以便获取里面的链接。
+        </div>
+        
+        <div class="col-12">
+            <h1>如何生成sitemap？</h1>
+            <div>
+                打开sitemap在线生成工具（http://sitemap.ztan.net），输入网站域名点击生成就行了。
+            </div>
+        </div>
+        <div class="col-12">
+            <h1>如何使用sitemap?</h1>
+            <div>
+                第一步，手动或通过网站地图生成工具自动生成sitemap的XML文件(可通过本网站的地图生成器生成)，本生成器将生成各搜索引擎支持的全部格式的文件；
+                第二步，将sitemap.xml等相关文件上传到网站目录下。比如网站为example.com，已制作了一个sitemap.xml的网站地图文件，将sitemap.xml上传至网站根目录即example.com/sitemap.xml；
+                第三步，登录百度站长平台，确保提交sitemap数据的网站example.com已验证；
+                第四步，点击链接提交，点sitemap提交，在“请填写数据文件地址”中输入网站地图的URL，本例即：example.com/sitemap.xml，输入验证码，点提交即可；
+                通常系统后台会自动定期提取URL列表，但如果你想手动更新，只要选中要更新的sitemap文件，然后点“手动更新文件”即可。
+                
+                全自动推送(API推送或API提交)
+                如果您已经注册了百度站长工具平台，您可以在在生成时添加高级选项中输入百度自动推送Token，这样系统在生成地图后将自动推送到百度的站长平台。
+                
+                使用主动推送功能会达到怎样效果
+                及时发现：可以缩短百度爬虫发现您站点新链接的时间，使新发布的页面可以在第一时间被百度收录
+                保护原创：对于网站的最新原创内容，使用主动推送功能可以快速通知到百度，使内容可以在转发之前被百度发现
             </div>
         </div>
     </div>
